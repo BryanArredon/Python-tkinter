@@ -13,6 +13,7 @@ try:
     client = MC("mongodb://localhost:27017/")
     db = client["BD_GrupoAlumno"]
     coleccion = db["Grupo"]
+    alumnos = db["Alumno"] 
 except Exception as e:
     print(f"Error: {e}")
 
@@ -152,11 +153,17 @@ def eliminar_datos():
 
     valores = tabla.item(seleccion,"values")
 
-    coleccion.delete_one({"cveGru":valores[0]})
+    cve_grupo = valores[0]
+
+    # eliminar grupo
+    coleccion.delete_one({"cveGru": cve_grupo})
+
+    # eliminar alumnos que pertenecen a ese grupo
+    alumnos.delete_many({"cveGru": cve_grupo})
 
     cargar_datos()
 
-    messagebox.showinfo("Éxito","Grupo eliminado")
+    messagebox.showinfo("Éxito","Grupo eliminado y alumnos del grupo eliminados")
 
 
 # --- BUSCAR ---
@@ -357,9 +364,12 @@ def eliminar_todos():
 
         coleccion.delete_many({})
 
+        # eliminar también todos los alumnos
+        alumnos.delete_many({})
+
         cargar_datos()
 
-        messagebox.showinfo("Éxito","Todos los grupos eliminados")
+        messagebox.showinfo("Éxito","Todos los grupos y alumnos eliminados")
 
 
 # --- INTERFAZ ---
@@ -463,7 +473,7 @@ tk.Button(frame_botones,text="Restaurar Backup",width=15,command=restaurar_backu
 
 tk.Button(
     frame_botones,
-    text="Eliminar TODOS los grupos",
+    text="Eliminar TODOS los Grupos",
     bg="#b71c1c",
     fg="white",
     width=25,
